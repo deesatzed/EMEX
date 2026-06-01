@@ -1,0 +1,37 @@
+{
+  "schema_version": "emex.case_input.v0.1",
+  "case_id": "SYN-ED-CP-001",
+  "mode": "synthetic",
+  "source": "synthetic_fixture",
+  "ehr_context": {
+    "past_history_summary": "Synthetic adult with hypertension, hyperlipidemia, and prior anxiety diagnosis. Prior chest discomfort workup two years ago was non-ischemic.",
+    "medications_allergies": [
+      "Amlodipine 5 mg daily",
+      "Atorvastatin 20 mg nightly",
+      "Aspirin 81 mg daily",
+      "Allergy: penicillin rash"
+    ],
+    "historical_diagnostics": [
+      "Prior ECG from a previous visit showed normal sinus rhythm without ischemic changes.",
+      "Prior outpatient stress test was reported low risk in historical chart summary."
+    ],
+    "historical_procedures": [
+      "Remote appendectomy"
+    ],
+    "prior_consult_notes": [
+      "Historical cardiology note advised risk-factor control and ED evaluation for exertional chest symptoms."
+    ]
+  },
+  "triage": {
+    "chief_complaint": "Chest pressure",
+    "triage_note": "Synthetic patient reports two hours of intermittent central chest pressure after walking upstairs, with mild nausea. No syncope. No focal neurologic deficits.",
+    "vitals": {
+      "heart_rate": 104,
+      "blood_pressure": "154/92",
+      "respiratory_rate": 18,
+      "oxygen_saturation": 98,
+      "temperature_c": 36.8
+    },
+    "acuity": "ESI 3"
+  }
+}
