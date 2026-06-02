@@ -40,6 +40,19 @@ The web page mirrors the pilot flow: paste synthetic EHR-like context, redact an
 
 The static web page is a workflow demo. The CLI/backend artifact path is authoritative for safety checks and audit artifacts until the web UI shares the Python validation/redaction engine.
 
+Provider web workflow:
+
+1. Load clinical information by pasting or uploading the deidentified/synthetic case context.
+2. Click `Prepare OE` to redact identifiers, check post-triage leakage, and create copy-ready OE input.
+3. Copy the redacted packet into OpenEvidence and run DotFlows in this order:
+   - `ed_shadow_recommender`
+   - `order_appropriateness_review`
+   - `risk_resource_forecast`
+   - `cost_restraint_review`
+   - `discordance_review` only after actual provider actions/outcomes are available for retrospective PI review.
+4. Paste the OE output back into EMEX.
+5. Click `Parse OE` to view structured clinician-draft suggestions and JSON output.
+
 ## Safety Boundaries
 
 - Synthetic mode only for the first runnable milestone.
