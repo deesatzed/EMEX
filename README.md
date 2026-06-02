@@ -40,6 +40,13 @@ The web page mirrors the pilot flow: paste synthetic EHR-like context, redact an
 
 The static web page is a workflow demo. The CLI/backend artifact path is authoritative for safety checks and audit artifacts until the web UI shares the Python validation/redaction engine.
 
+OE Companion Mode:
+
+1. Open OpenEvidence and authenticate in the browser with the user's normal OE account.
+2. Open EMEX at the local web URL.
+3. Use browser split view or two side-by-side windows so OE and EMEX remain visible together.
+4. Keep the workflow manual: EMEX does not iframe OE, read OE pages, automate OE, or send data to OE directly.
+
 Provider web workflow:
 
 1. Load clinical information by pasting or uploading the deidentified/synthetic case context.

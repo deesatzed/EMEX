@@ -20,3 +20,8 @@ def test_static_web_declares_demo_only_and_cli_authority():
     assert "Last: discordance_review" in html
     assert "Copy OE Input" in html
     assert "Copy JSON" in html
+    assert "OE Companion Mode" in html
+    assert "Open OpenEvidence" in html
+    assert "Use browser split view or two side-by-side windows" in html
+    assert "Do not embed OpenEvidence" in html
+    assert 'target="_blank"' in html

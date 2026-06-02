@@ -70,7 +70,7 @@
       gap: 8px;
       margin: 10px 0 16px;
     }
-    button, label.file {
+    button, label.file, a.button {
       border: 1px solid #aab6c2;
       background: #eef4f8;
       color: var(--ink);
@@ -79,8 +79,11 @@
       font-weight: 680;
       cursor: pointer;
       font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
     }
-    button.primary { background: var(--blue); color: white; border-color: var(--blue); }
+    button.primary, a.button.primary { background: var(--blue); color: white; border-color: var(--blue); }
     button.good { background: var(--green); color: white; border-color: var(--green); }
     input[type=file] { display: none; }
     .status {
@@ -195,6 +198,26 @@
       <div class="panel full" style="margin-bottom:12px">
         <strong>Workflow demo only.</strong>
         <span class="small">The CLI/backend artifact path is authoritative for safety checks and audit artifacts.</span>
+      </div>
+      <div class="panel full" style="margin-bottom:12px">
+        <div class="split-head">
+          <h2>OE Companion Mode</h2>
+          <a class="button primary" href="https://www.openevidence.com/" target="_blank" rel="noopener noreferrer">Open OpenEvidence</a>
+        </div>
+        <div class="provider-steps">
+          <div class="step">
+            <span class="num">A</span>
+            <p><strong>Authenticate into OE separately.</strong><br><span class="small">Use your normal OpenEvidence login in the browser. EMEX does not handle OE credentials, sessions, or content.</span></p>
+          </div>
+          <div class="step">
+            <span class="num">B</span>
+            <p><strong>Use browser split view or two side-by-side windows.</strong><br><span class="small">Keep EMEX on one side and OpenEvidence on the other for manual copy-paste.</span></p>
+          </div>
+          <div class="step">
+            <span class="num">C</span>
+            <p><strong>Do not embed OpenEvidence.</strong><br><span class="small">OE runs as its own authenticated site. EMEX does not iframe OE, read OE pages, automate OE, or transmit data to OE directly.</span></p>
+          </div>
+        </div>
       </div>
       <div class="panel full" style="margin-bottom:12px">
         <h2>Provider Workflow</h2>
