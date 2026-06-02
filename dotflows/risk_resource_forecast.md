@@ -22,17 +22,17 @@ Check whether these resource-relevant facts are present:
 
 List missing facts in `missing_information`.
 
-## Step 2 - Risk Bucket
+## Step 2 - Next-Step Triage Category
 Select one:
-- `low_risk`
-- `moderate_risk`
-- `high_risk`
-- `uncertain`
+- `immediate_acute_critical_care_provider_eval`
+- `provider_eval_with_labs_di_plan`
+- `structured_outpatient_or_telehealth_review`
+- `hybrid_labs_di_then_outpatient_review`
 - `insufficient_information`
 
 Do not translate this bucket into a disposition.
 
-## Step 3 - Resource Forecast
+## Step 3 - Next-Step Resource and Evaluation Forecast
 Describe likely review needs using cautious language:
 - Monitoring intensity to consider.
 - Diagnostic complexity to anticipate.
@@ -65,16 +65,22 @@ Do not write:
 ## Expected Plain Text Output
 Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+NEXT_STEP_TRIAGE_CATEGORY: immediate_acute_critical_care_provider_eval | provider_eval_with_labs_di_plan | structured_outpatient_or_telehealth_review | hybrid_labs_di_then_outpatient_review | insufficient_information
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Rationale...
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider...
 
-RESOURCE_FORECAST:
-- Likely...
+SUGGESTED_PROVIDER_EVAL:
+- Provider evaluation needed...
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid...
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth consideration...
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway consideration...
 
 MISSING_INFORMATION:
 - Missing...

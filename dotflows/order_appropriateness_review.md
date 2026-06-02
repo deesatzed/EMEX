@@ -7,7 +7,7 @@ Review EMEX clinician-draft order considerations against the redacted T0 context
 Use only the pasted EMEX packet and any clinician-draft suggestions included with it:
 - Redacted T0 clinical context.
 - Current triage facts available at T0.
-- Existing `suggested_order_considerations` if EMEX supplies them.
+- Existing next-step triage synthesis fields if EMEX supplies them.
 - Redaction and leakage notes supplied by EMEX.
 
 Do not use post-T0 diagnostic results, ED course, final diagnoses, disposition, or outcomes.
@@ -19,7 +19,7 @@ Determine whether the packet is sufficient to assess order appropriateness:
 - Baseline diagnostics or prior procedures are present when relevant.
 - Triage vital signs and symptoms are available.
 
-Put unavailable information in `missing_information`. If the missing data prevents review, set `risk_bucket` to `insufficient_information`.
+Put unavailable information in `MISSING_INFORMATION`. If the missing data prevents review, set `NEXT_STEP_TRIAGE_CATEGORY` to `insufficient_information`.
 
 ## Step 2 - Appropriateness Screen
 For each proposed consideration, classify the concern in plain language:
@@ -31,13 +31,16 @@ For each proposed consideration, classify the concern in plain language:
 Keep this as clinician-draft review language, not as an instruction.
 
 ## Step 3 - Structured Output
-Populate the EMEX JSON keys:
-- `suggested_order_considerations`: refined non-imperative considerations.
-- `resource_forecast`: operational implications of appropriate evaluation intensity.
-- `cost_restraint_cautions`: duplicate imaging, serial testing, low-value screening, or cost exposure concerns.
-- `missing_information`: data needed before confident review.
-- `evidence_notes`: OpenEvidence-cited rationale or limitation.
-- `safety_flags`: safety, redaction, post-T0, or uncertainty flags.
+Populate the EMEX plain-text labels:
+- `NEXT_STEP_TRIAGE_CATEGORY`: one allowed next-step category.
+- `TRIAGE_RATIONALE`: why the category fits the supplied T0 facts.
+- `SUGGESTED_NEXT_STEP_LABS_DI`: non-imperative labs/DI considerations needed to complete next-step triage.
+- `SUGGESTED_PROVIDER_EVAL`: provider evaluation needed before next-step triage.
+- `OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS`: outpatient or telehealth planning considerations when appropriate.
+- `HYBRID_PATHWAY_CONSIDERATIONS`: targeted labs/DI or provider review that could make outpatient-style planning possible.
+- `MISSING_INFORMATION`: data needed before confident review.
+- `EVIDENCE_NOTES`: OpenEvidence-cited rationale or limitation.
+- `SAFETY_FLAGS`: safety, redaction, post-T0, or uncertainty flags.
 
 ## Evidence Rules
 - Use OpenEvidence-cited evidence or guideline rationale where available.
@@ -64,16 +67,22 @@ Do not write:
 ## Expected Plain Text Output
 Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+NEXT_STEP_TRIAGE_CATEGORY: immediate_acute_critical_care_provider_eval | provider_eval_with_labs_di_plan | structured_outpatient_or_telehealth_review | hybrid_labs_di_then_outpatient_review | insufficient_information
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Rationale...
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider...
 
-RESOURCE_FORECAST:
-- Likely...
+SUGGESTED_PROVIDER_EVAL:
+- Provider evaluation needed...
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid...
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth consideration...
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway consideration...
 
 MISSING_INFORMATION:
 - Missing...

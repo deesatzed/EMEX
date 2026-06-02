@@ -24,6 +24,18 @@ def test_run_demo_emits_required_artifacts(tmp_path):
     assert expected.issubset({p.name for p in tmp_path.iterdir()})
     suggestions = json.loads((tmp_path / "structured_suggestions.json").read_text())
     assert suggestions["status"] == "clinician_draft"
+    assert suggestions["next_step_triage_category"] == "provider_eval_with_labs_di_plan"
+    assert suggestions["suggested_next_step_labs_di"]
+    assert suggestions["suggested_provider_eval"]
+
+    report = (tmp_path / "report.html").read_text()
+    assert "Next-Step Triage Category" in report
+    assert "Suggested Next-Step Labs / DI" in report
+    assert "Suggested Provider Evaluation" in report
+
+    summary = (tmp_path / "PI_SUMMARY.md").read_text()
+    assert "Next-step triage category" in summary
+    assert "provider_eval_with_labs_di_plan" in summary
 
 
 def test_trace_file_is_hash_chained(tmp_path):

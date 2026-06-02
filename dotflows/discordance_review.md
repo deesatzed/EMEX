@@ -19,7 +19,7 @@ Identify whether the review packet includes enough context:
 - Actual actions or outcomes, if discordance review is requested.
 - Timing boundary between T0 facts and later facts.
 
-If timing is unclear, set `risk_bucket` to `insufficient_information` or `uncertain` and add a `safety_flags` entry.
+If timing is unclear, set `NEXT_STEP_TRIAGE_CATEGORY` to `insufficient_information` and add a `SAFETY_FLAGS` entry.
 
 ## Step 2 - Discordance Classification
 Classify differences without assigning blame:
@@ -33,12 +33,15 @@ Do not treat provider concordance as correctness. Do not treat model disagreemen
 
 ## Step 3 - Review Output
 Populate:
-- `suggested_order_considerations` with items that may need PI chart review, using non-imperative language.
-- `resource_forecast` with operational deltas if relevant.
-- `cost_restraint_cautions` with duplicate or low-value review questions if relevant.
-- `missing_information` with facts needed for a fair review.
-- `evidence_notes` with OpenEvidence-cited rationale or explicit uncertainty.
-- `safety_flags` with timing, PHI, or review-limit flags.
+- `NEXT_STEP_TRIAGE_CATEGORY` with the after-the-fact review category.
+- `TRIAGE_RATIONALE` with why the category fits the supplied review facts.
+- `SUGGESTED_NEXT_STEP_LABS_DI` with items that may need PI chart review, using non-imperative language.
+- `SUGGESTED_PROVIDER_EVAL` with provider review questions needed to complete the PI review.
+- `OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS` when the review suggests outpatient-style planning could have been considered.
+- `HYBRID_PATHWAY_CONSIDERATIONS` when targeted labs/DI or provider review separates pathways.
+- `MISSING_INFORMATION` with facts needed for a fair review.
+- `EVIDENCE_NOTES` with OpenEvidence-cited rationale or explicit uncertainty.
+- `SAFETY_FLAGS` with timing, PHI, or review-limit flags.
 
 ## Evidence Rules
 - Use OpenEvidence-cited evidence or guideline rationale where available.
@@ -65,16 +68,22 @@ Do not write:
 ## Expected Plain Text Output
 Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+NEXT_STEP_TRIAGE_CATEGORY: immediate_acute_critical_care_provider_eval | provider_eval_with_labs_di_plan | structured_outpatient_or_telehealth_review | hybrid_labs_di_then_outpatient_review | insufficient_information
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Rationale...
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider...
 
-RESOURCE_FORECAST:
-- Likely...
+SUGGESTED_PROVIDER_EVAL:
+- Provider evaluation needed...
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid...
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth consideration...
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway consideration...
 
 MISSING_INFORMATION:
 - Missing...

@@ -317,17 +317,23 @@
     };
     const exampleOe = `OpenEvidence DotFlow Output - Synthetic
 
-RISK_BUCKET: moderate_risk
+NEXT_STEP_TRIAGE_CATEGORY: provider_eval_with_labs_di_plan
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Stable triage vitals but exertional chest pressure requires provider review before outpatient-style planning.
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider ECG early because exertional chest pressure is time-sensitive and low burden.
 - Consider troponin pathway per local chest pain protocol after clinician review.
 
-RESOURCE_FORECAST:
-- Likely monitored evaluation area if symptoms continue or ECG/troponin abnormal.
+SUGGESTED_PROVIDER_EVAL:
+- Provider should assess chest pain character, onset, persistence, associated symptoms, and current vital trend.
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid broad CT imaging as default without presentation-specific indication.
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth planning is premature until targeted ED evaluation is reviewed.
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway could apply if initial provider review and targeted labs/DI are reassuring.
 
 MISSING_INFORMATION:
 - Exact onset time and symptom persistence.
@@ -446,7 +452,7 @@ SAFETY_FLAGS:
         "SAFETY BOUNDARY: This packet is for clinician review and PI shadow evaluation only.",
         "T0 BOUNDARY: Use only pre-T0 historical context and current triage information.",
         `SOURCE FORMAT: ${input.kind === "plain_text" ? "free text narrative" : "structured source rendered as plain text"}.`,
-        "OUTPUT REQUEST: Return plain text only using the DotFlow labels: RISK_BUCKET, SUGGESTED_ORDER_CONSIDERATIONS, RESOURCE_FORECAST, COST_RESTRAINT_CAUTIONS, MISSING_INFORMATION, EVIDENCE_NOTES, and SAFETY_FLAGS. Do not return JSON or code fences. Use insufficient_information instead of forced recommendations.",
+        "OUTPUT REQUEST: Return plain text only using the DotFlow labels: NEXT_STEP_TRIAGE_CATEGORY, TRIAGE_RATIONALE, SUGGESTED_NEXT_STEP_LABS_DI, SUGGESTED_PROVIDER_EVAL, OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS, HYBRID_PATHWAY_CONSIDERATIONS, MISSING_INFORMATION, EVIDENCE_NOTES, and SAFETY_FLAGS. Do not return JSON or code fences. Use insufficient_information instead of forced recommendations.",
         red.output
       ].join("\n\n");
       const blocked = leaks.length || !input.synthetic;
@@ -464,6 +470,12 @@ SAFETY_FLAGS:
     }
     function parsePlainTextOe(text) {
       const labelMap = {
+        NEXT_STEP_TRIAGE_CATEGORY: "next_step_triage_category",
+        TRIAGE_RATIONALE: "triage_rationale",
+        SUGGESTED_NEXT_STEP_LABS_DI: "suggested_next_step_labs_di",
+        SUGGESTED_PROVIDER_EVAL: "suggested_provider_eval",
+        OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS: "outpatient_or_telehealth_considerations",
+        HYBRID_PATHWAY_CONSIDERATIONS: "hybrid_pathway_considerations",
         RISK_BUCKET: "risk_bucket",
         RISK: "risk_bucket",
         SUGGESTED_ORDER_CONSIDERATIONS: "suggested_order_considerations",
@@ -476,6 +488,12 @@ SAFETY_FLAGS:
         SAFETY_FLAGS: "safety_flags"
       };
       const parsed = {
+        next_step_triage_category: "insufficient_information",
+        triage_rationale: [],
+        suggested_next_step_labs_di: [],
+        suggested_provider_eval: [],
+        outpatient_or_telehealth_considerations: [],
+        hybrid_pathway_considerations: [],
         risk_bucket: "insufficient_information",
         suggested_order_considerations: [],
         resource_forecast: [],
@@ -494,7 +512,7 @@ SAFETY_FLAGS:
           if (key) {
             current = key;
             if (match[2]) {
-              if (key === "risk_bucket") parsed[key] = match[2].trim();
+              if (key === "risk_bucket" || key === "next_step_triage_category") parsed[key] = match[2].trim();
               else parsed[key].push(match[2].trim());
             }
           }
@@ -508,10 +526,22 @@ SAFETY_FLAGS:
     }
     function hasMinimumParsedStructure(parsed) {
       return parsed
-        && parsed.risk_bucket
-        && parsed.risk_bucket !== "insufficient_information"
-        && Array.isArray(parsed.suggested_order_considerations)
-        && parsed.suggested_order_considerations.length > 0;
+        && (
+          (
+            parsed.next_step_triage_category
+            && parsed.next_step_triage_category !== "insufficient_information"
+            && Array.isArray(parsed.suggested_next_step_labs_di)
+            && parsed.suggested_next_step_labs_di.length > 0
+            && Array.isArray(parsed.suggested_provider_eval)
+            && parsed.suggested_provider_eval.length > 0
+          )
+          || (
+            parsed.risk_bucket
+            && parsed.risk_bucket !== "insufficient_information"
+            && Array.isArray(parsed.suggested_order_considerations)
+            && parsed.suggested_order_considerations.length > 0
+          )
+        );
     }
     function parseOe() {
       const match = oeOutput.value.match(/```json\s*([\s\S]*?)\s*```/);
@@ -532,10 +562,12 @@ SAFETY_FLAGS:
       suggestionsJson.textContent = lastSuggestionsJson;
       suggestions.innerHTML = `
         <p><strong>Status:</strong> clinician_draft</p>
-        <p><strong>Risk:</strong> ${parsed.risk_bucket || "insufficient_information"}</p>
-        <h2>Order Considerations</h2><ul>${list("suggested_order_considerations")}</ul>
-        <h2>Resource Forecast</h2><ul>${list("resource_forecast")}</ul>
-        <h2>Cost / Restraint</h2><ul>${list("cost_restraint_cautions")}</ul>
+        <p><strong>Next-Step Triage Category:</strong> ${parsed.next_step_triage_category || "insufficient_information"}</p>
+        <h2>Triage Rationale</h2><ul>${list("triage_rationale")}</ul>
+        <h2>Suggested Next-Step Labs / DI</h2><ul>${list("suggested_next_step_labs_di")}</ul>
+        <h2>Suggested Provider Evaluation</h2><ul>${list("suggested_provider_eval")}</ul>
+        <h2>Outpatient / Telehealth Considerations</h2><ul>${list("outpatient_or_telehealth_considerations")}</ul>
+        <h2>Hybrid Pathway Considerations</h2><ul>${list("hybrid_pathway_considerations")}</ul>
         <h2>Missing Information</h2><ul>${list("missing_information")}</ul>
         <h2>Evidence Notes</h2><ul>${list("evidence_notes")}</ul>
         <h2>Safety Flags</h2><ul>${list("safety_flags")}</ul>

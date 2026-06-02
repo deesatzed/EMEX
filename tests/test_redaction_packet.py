@@ -22,5 +22,7 @@ def test_oe_packet_contains_t0_and_clinician_review_warnings():
     assert "clinician review" in packet["redacted_oe_input"].lower()
     assert "Return plain text only" in packet["redacted_oe_input"]
     assert "Do not return JSON or code fences" in packet["redacted_oe_input"]
-    assert "RISK_BUCKET" in packet["redacted_oe_input"]
+    assert "NEXT_STEP_TRIAGE_CATEGORY" in packet["redacted_oe_input"]
+    assert "SUGGESTED_NEXT_STEP_LABS_DI" in packet["redacted_oe_input"]
+    assert "SUGGESTED_PROVIDER_EVAL" in packet["redacted_oe_input"]
     assert packet["phi_redaction_report"]["copy_ready"] is True

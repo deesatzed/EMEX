@@ -5,7 +5,7 @@
 ```text
 /goal
 OUTCOME:
-Create EMEX (Emergency Medicine Engagement Exchange) Phase 1 as a synthetic-first local web and CLI pilot for a manual OpenEvidence (OE) DotFlow workflow. EMEX lets a clinician-user paste or upload EHR-derived context that was obtained outside the application, redacts PHI, rejects current-visit post-triage leakage, generates OE DotFlow-ready input, accepts manually pasted OE output, and converts that output into clinician-draft structured suggestions plus auditable PI artifacts. Phase 1 must not connect to Epic/EHR, must not call OE directly, must not use real PHI in the runnable milestone, and must not perform autonomous diagnosis, orders, disposition, routing, or patient-facing advice.
+Create EMEX (Emergency Medicine Engagement Exchange) Phase 1 as a synthetic-first local web and CLI pilot for a manual OpenEvidence (OE) DotFlow workflow. EMEX lets a clinician-user paste or upload EHR-derived context that was obtained outside the application, redacts PHI, rejects current-visit post-triage leakage, generates OE DotFlow-ready input, accepts manually pasted OE output, and converts that output into clinician-draft next-step triage synthesis plus auditable PI artifacts. Phase 1 must not connect to Epic/EHR, must not call OE directly, must not use real PHI in the runnable milestone, and must not perform autonomous diagnosis, orders, disposition, routing, or patient-facing advice.
 
 PROOF OF DONE:
 1. Create the EMEX repo at `/Volumes/WS4TB/WS4TBr/clinclaw/EMEX` with project docs, source, tests, fixtures, DotFlows, and a local web UX.
@@ -31,7 +31,25 @@ FIRST-PILOT UX:
 5. User copies the redacted packet into OE and runs the appropriate DotFlow manually.
 6. OE outputs its evaluation to the OE screen.
 7. User copies the plain-text OE output back into EMEX.
-8. EMEX preserves the raw OE output, parses labeled plain-text sections into structured clinician-draft suggestions, and emits audit artifacts.
+8. EMEX preserves the raw OE output, parses labeled plain-text sections into structured clinician-draft next-step triage synthesis, and emits audit artifacts.
+
+FINAL TRIAGE SYNTHESIS:
+- `immediate_acute_critical_care_provider_eval`: needs acute/critical care or immediate provider evaluation.
+- `provider_eval_with_labs_di_plan`: needs provider evaluation plus suggested next-step labs/DI to complete triage.
+- `structured_outpatient_or_telehealth_review`: potentially stable for outpatient, telehealth, or triage-provider review after clinician confirmation.
+- `hybrid_labs_di_then_outpatient_review`: needs targeted labs/DI or provider review before outpatient-style planning can be considered.
+- `insufficient_information`: cannot safely classify from the supplied triage-complete information.
+
+EXPECTED SYNTHESIS FIELDS:
+- `next_step_triage_category`
+- `triage_rationale`
+- `suggested_next_step_labs_di`
+- `suggested_provider_eval`
+- `outpatient_or_telehealth_considerations`
+- `hybrid_pathway_considerations`
+- `missing_information`
+- `evidence_notes`
+- `safety_flags`
 
 SAFETY / PROVENANCE:
 - Synthetic mode is the only runnable milestone. Real PHI mode is blocked until an approved environment, QI/IRB/compliance path, and privacy controls are documented.

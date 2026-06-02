@@ -10,13 +10,23 @@ REQUIRED_DOTFLOWS = [
 ]
 
 REQUIRED_PLAIN_TEXT_LABELS = [
-    "RISK_BUCKET:",
-    "SUGGESTED_ORDER_CONSIDERATIONS:",
-    "RESOURCE_FORECAST:",
-    "COST_RESTRAINT_CAUTIONS:",
+    "NEXT_STEP_TRIAGE_CATEGORY:",
+    "TRIAGE_RATIONALE:",
+    "SUGGESTED_NEXT_STEP_LABS_DI:",
+    "SUGGESTED_PROVIDER_EVAL:",
+    "OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:",
+    "HYBRID_PATHWAY_CONSIDERATIONS:",
     "MISSING_INFORMATION:",
     "EVIDENCE_NOTES:",
     "SAFETY_FLAGS:",
+]
+
+REQUIRED_TRIAGE_CATEGORIES = [
+    "immediate_acute_critical_care_provider_eval",
+    "provider_eval_with_labs_di_plan",
+    "structured_outpatient_or_telehealth_review",
+    "hybrid_labs_di_then_outpatient_review",
+    "insufficient_information",
 ]
 
 REQUIRED_SECTIONS = [
@@ -51,6 +61,8 @@ def test_required_dotflows_exist_and_name_emex_schema():
         assert "Do not use code fences" in text
         for label in REQUIRED_PLAIN_TEXT_LABELS:
             assert label in text
+        for category in REQUIRED_TRIAGE_CATEGORIES:
+            assert category in text
         for section in REQUIRED_SECTIONS:
             assert section in text
 

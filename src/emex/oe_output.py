@@ -10,6 +10,13 @@ from .hashing import hash_text
 
 
 JSON_BLOCK_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.S)
+ALLOWED_TRIAGE_CATEGORIES = {
+    "immediate_acute_critical_care_provider_eval",
+    "provider_eval_with_labs_di_plan",
+    "structured_outpatient_or_telehealth_review",
+    "hybrid_labs_di_then_outpatient_review",
+    "insufficient_information",
+}
 UNSAFE_IMPERATIVE_RE = re.compile(
     r"^\s*(order|discharge|admit|prescribe|administer|give|send\s+home|route)\b",
     re.I,
@@ -41,7 +48,12 @@ def parse_oe_output(text: str, case_id: str) -> dict[str, Any]:
         parse_warnings.append("Used conservative Markdown fallback parser; clinician review required")
 
     unsafe_phrases = _unsafe_order_or_disposition_phrases(parsed)
-    status = "clinician_draft" if _has_minimum_structure(parsed) and not unsafe_phrases else "needs_review"
+    unknown_category = _has_unknown_triage_category(parsed)
+    status = (
+        "clinician_draft"
+        if _has_minimum_structure(parsed) and not unsafe_phrases and not unknown_category
+        else "needs_review"
+    )
     suggestions = {
         "schema_version": "emex.structured_suggestions.v0.1",
         "case_id": case_id,
@@ -50,6 +62,14 @@ def parse_oe_output(text: str, case_id: str) -> dict[str, Any]:
             "Clinician draft for PI review and clinician review only. Not patient-facing, "
             "not autonomous orders, diagnosis, disposition, or routing."
         ),
+        "next_step_triage_category": parsed.get("next_step_triage_category", "insufficient_information"),
+        "triage_rationale": parsed.get("triage_rationale", []),
+        "suggested_next_step_labs_di": parsed.get("suggested_next_step_labs_di", []),
+        "suggested_provider_eval": parsed.get("suggested_provider_eval", []),
+        "outpatient_or_telehealth_considerations": parsed.get(
+            "outpatient_or_telehealth_considerations", []
+        ),
+        "hybrid_pathway_considerations": parsed.get("hybrid_pathway_considerations", []),
         "risk_bucket": parsed.get("risk_bucket", "insufficient_information"),
         "suggested_order_considerations": parsed.get("suggested_order_considerations", []),
         "resource_forecast": parsed.get("resource_forecast", []),
@@ -62,6 +82,8 @@ def parse_oe_output(text: str, case_id: str) -> dict[str, Any]:
     }
     if suggestions["status"] == "needs_review":
         suggestions["safety_flags"].append("OE output lacked minimum expected structure")
+    if unknown_category:
+        suggestions["safety_flags"].append("Unknown next-step triage category")
     if unsafe_phrases:
         suggestions["safety_flags"].append(
             "OE output contained order/disposition imperative language requiring clinician review"
@@ -71,11 +93,19 @@ def parse_oe_output(text: str, case_id: str) -> dict[str, Any]:
 
 
 def _has_minimum_structure(parsed: dict[str, Any]) -> bool:
-    return (
+    has_triage_synthesis = (
+        parsed.get("next_step_triage_category") not in {None, "", "insufficient_information"}
+        and isinstance(parsed.get("suggested_next_step_labs_di", []), list)
+        and bool(parsed.get("suggested_next_step_labs_di", []))
+        and isinstance(parsed.get("suggested_provider_eval", []), list)
+        and bool(parsed.get("suggested_provider_eval", []))
+    )
+    has_legacy_structure = (
         parsed.get("risk_bucket") not in {None, "", "insufficient_information"}
         and isinstance(parsed.get("suggested_order_considerations", []), list)
         and bool(parsed.get("suggested_order_considerations", []))
     )
+    return has_triage_synthesis or has_legacy_structure
 
 
 def _parse_markdown_fallback(text: str) -> dict[str, Any]:
@@ -92,6 +122,14 @@ def _parse_markdown_fallback(text: str) -> dict[str, Any]:
             sections.setdefault(current, []).append(stripped.lstrip("- ").strip())
 
     return {
+        "next_step_triage_category": _first_value(sections, ["next_step_triage_category"]),
+        "triage_rationale": _values(sections, ["triage_rationale"]),
+        "suggested_next_step_labs_di": _values(sections, ["suggested_next_step_labs_di"]),
+        "suggested_provider_eval": _values(sections, ["suggested_provider_eval"]),
+        "outpatient_or_telehealth_considerations": _values(
+            sections, ["outpatient_or_telehealth_considerations"]
+        ),
+        "hybrid_pathway_considerations": _values(sections, ["hybrid_pathway_considerations"]),
         "risk_bucket": _first_value(sections, ["risk_bucket", "risk"]),
         "suggested_order_considerations": _values(sections, ["suggested_order_considerations", "orders"]),
         "resource_forecast": _values(sections, ["resource_forecast", "resources"]),
@@ -108,6 +146,12 @@ def _parse_plain_text_sections(text: str) -> dict[str, Any]:
     label_aliases = {
         "RISK_BUCKET": "risk_bucket",
         "RISK": "risk_bucket",
+        "NEXT_STEP_TRIAGE_CATEGORY": "next_step_triage_category",
+        "TRIAGE_RATIONALE": "triage_rationale",
+        "SUGGESTED_NEXT_STEP_LABS_DI": "suggested_next_step_labs_di",
+        "SUGGESTED_PROVIDER_EVAL": "suggested_provider_eval",
+        "OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS": "outpatient_or_telehealth_considerations",
+        "HYBRID_PATHWAY_CONSIDERATIONS": "hybrid_pathway_considerations",
         "SUGGESTED_ORDER_CONSIDERATIONS": "suggested_order_considerations",
         "ORDER_CONSIDERATIONS": "suggested_order_considerations",
         "RESOURCE_FORECAST": "resource_forecast",
@@ -135,6 +179,14 @@ def _parse_plain_text_sections(text: str) -> dict[str, Any]:
             sections.setdefault(current, []).append(stripped.lstrip("-* ").strip())
 
     return {
+        "next_step_triage_category": _first_value(sections, ["next_step_triage_category"]),
+        "triage_rationale": sections.get("triage_rationale", []),
+        "suggested_next_step_labs_di": sections.get("suggested_next_step_labs_di", []),
+        "suggested_provider_eval": sections.get("suggested_provider_eval", []),
+        "outpatient_or_telehealth_considerations": sections.get(
+            "outpatient_or_telehealth_considerations", []
+        ),
+        "hybrid_pathway_considerations": sections.get("hybrid_pathway_considerations", []),
         "risk_bucket": _first_value(sections, ["risk_bucket"]),
         "suggested_order_considerations": sections.get("suggested_order_considerations", []),
         "resource_forecast": sections.get("resource_forecast", []),
@@ -147,7 +199,15 @@ def _parse_plain_text_sections(text: str) -> dict[str, Any]:
 
 def _unsafe_order_or_disposition_phrases(parsed: dict[str, Any]) -> list[str]:
     phrases: list[str] = []
-    for key in ("suggested_order_considerations", "resource_forecast", "safety_flags"):
+    for key in (
+        "suggested_order_considerations",
+        "resource_forecast",
+        "suggested_next_step_labs_di",
+        "suggested_provider_eval",
+        "outpatient_or_telehealth_considerations",
+        "hybrid_pathway_considerations",
+        "safety_flags",
+    ):
         values = parsed.get(key, [])
         if not isinstance(values, list):
             continue
@@ -156,6 +216,11 @@ def _unsafe_order_or_disposition_phrases(parsed: dict[str, Any]) -> list[str]:
             if UNSAFE_IMPERATIVE_RE.search(text):
                 phrases.append(text)
     return phrases
+
+
+def _has_unknown_triage_category(parsed: dict[str, Any]) -> bool:
+    category = parsed.get("next_step_triage_category")
+    return bool(category) and category not in ALLOWED_TRIAGE_CATEGORIES
 
 
 def _values(sections: dict[str, list[str]], names: list[str]) -> list[str]:

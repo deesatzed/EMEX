@@ -12,7 +12,7 @@ Use only the pasted EMEX packet:
 - Current visit triage information available at T0.
 - Redaction and leakage notes supplied by EMEX.
 
-Do not use post-T0 labs, imaging results, ED course, diagnosis, disposition, or outcomes. If the packet contains those facts, direct identifiers, or non-redacted PHI, set `risk_bucket` to `insufficient_information`, add a `safety_flags` entry, and do not produce substantive suggestions.
+Do not use post-T0 labs, imaging results, ED course, diagnosis, disposition, or outcomes. If the packet contains those facts, direct identifiers, or non-redacted PHI, set `NEXT_STEP_TRIAGE_CATEGORY` to `insufficient_information`, add a `SAFETY_FLAGS` entry, and do not produce substantive suggestions.
 
 ## Step 1 - Input Completeness Check
 Identify whether the T0 packet contains enough information to support ED shadow review:
@@ -36,11 +36,14 @@ The bucket is a draft PI stratification, not a clinical disposition.
 
 ## Step 3 - Clinician-Draft Suggestions
 Generate concise considerations in these domains:
-- `suggested_order_considerations`: non-imperative diagnostic or monitoring considerations.
-- `resource_forecast`: likely resource intensity or operational needs to review.
-- `cost_restraint_cautions`: duplicate, low-value, or cost-sensitive testing cautions when safety permits.
-- `evidence_notes`: brief evidence or guideline rationale with OpenEvidence citations when available.
-- `safety_flags`: reasons a clinician must review before use.
+- `NEXT_STEP_TRIAGE_CATEGORY`: one allowed next-step category.
+- `TRIAGE_RATIONALE`: why that category fits the supplied T0 facts.
+- `SUGGESTED_NEXT_STEP_LABS_DI`: labs/diagnostic imaging considerations needed to complete next-step triage.
+- `SUGGESTED_PROVIDER_EVAL`: provider evaluation needed before next-step triage.
+- `OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS`: stable outpatient or telehealth planning considerations when appropriate.
+- `HYBRID_PATHWAY_CONSIDERATIONS`: targeted labs/DI or provider review that could make outpatient-style planning possible.
+- `EVIDENCE_NOTES`: brief evidence or guideline rationale with OpenEvidence citations when available.
+- `SAFETY_FLAGS`: reasons a clinician must review before use.
 
 Use "Consider..." or "Review whether..." language. Do not use command language.
 
@@ -69,16 +72,22 @@ Do not write:
 ## Expected Plain Text Output
 Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+NEXT_STEP_TRIAGE_CATEGORY: immediate_acute_critical_care_provider_eval | provider_eval_with_labs_di_plan | structured_outpatient_or_telehealth_review | hybrid_labs_di_then_outpatient_review | insufficient_information
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Rationale...
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider...
 
-RESOURCE_FORECAST:
-- Likely...
+SUGGESTED_PROVIDER_EVAL:
+- Provider evaluation needed...
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid...
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth consideration...
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway consideration...
 
 MISSING_INFORMATION:
 - Missing...

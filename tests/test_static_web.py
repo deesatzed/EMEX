@@ -25,7 +25,14 @@ def test_static_web_declares_demo_only_and_cli_authority():
     assert "parsePlainTextOe" in html
     assert "OE output lacks parseable plain text labels" in html
     assert "OE output lacks parseable fenced JSON" not in html
-    assert "SUGGESTED_ORDER_CONSIDERATIONS:" in html
+    assert "NEXT_STEP_TRIAGE_CATEGORY:" in html
+    assert "SUGGESTED_NEXT_STEP_LABS_DI:" in html
+    assert "SUGGESTED_PROVIDER_EVAL:" in html
+    assert "OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:" in html
+    assert "HYBRID_PATHWAY_CONSIDERATIONS:" in html
+    assert "Next-Step Triage Category" in html
+    assert "Suggested Next-Step Labs / DI" in html
+    assert "Suggested Provider Evaluation" in html
     assert "OE Companion Mode" in html
     assert "Open OpenEvidence" in html
     assert "Use browser split view or two side-by-side windows" in html

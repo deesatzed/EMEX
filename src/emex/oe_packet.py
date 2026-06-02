@@ -40,7 +40,7 @@ def build_oe_packet(payload: dict[str, Any]) -> dict[str, Any]:
             "# EMEX Redacted OE DotFlow Input",
             "SAFETY BOUNDARY: This packet is for clinician review and PI shadow evaluation only.",
             "T0 BOUNDARY: Use only pre-T0 historical context and current triage information. Do not infer from labs, imaging results, ED course, diagnosis, disposition, or outcomes.",
-            "OUTPUT REQUEST: Return plain text only using the DotFlow labels: RISK_BUCKET, SUGGESTED_ORDER_CONSIDERATIONS, RESOURCE_FORECAST, COST_RESTRAINT_CAUTIONS, MISSING_INFORMATION, EVIDENCE_NOTES, and SAFETY_FLAGS. Do not return JSON or code fences. Use insufficient_information instead of forced recommendations.",
+            "OUTPUT REQUEST: Return plain text only using the DotFlow labels: NEXT_STEP_TRIAGE_CATEGORY, TRIAGE_RATIONALE, SUGGESTED_NEXT_STEP_LABS_DI, SUGGESTED_PROVIDER_EVAL, OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS, HYBRID_PATHWAY_CONSIDERATIONS, MISSING_INFORMATION, EVIDENCE_NOTES, and SAFETY_FLAGS. Do not return JSON or code fences. Use insufficient_information instead of forced recommendations.",
             redaction.redacted_text,
         ]
     )

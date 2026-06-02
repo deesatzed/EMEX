@@ -33,11 +33,14 @@ Do not frame cost reduction as success unless the evidence and safety context su
 
 ## Step 3 - Structured Output
 Populate:
-- `cost_restraint_cautions` with concrete but non-imperative cautions.
-- `suggested_order_considerations` only when safer sequencing or alternative evaluation should be reviewed.
-- `resource_forecast` if cost and resource intensity are linked.
-- `evidence_notes` with cited support or uncertainty.
-- `safety_flags` for any reason restraint could be unsafe.
+- `NEXT_STEP_TRIAGE_CATEGORY` with one allowed next-step category.
+- `TRIAGE_RATIONALE` with why the category fits the supplied T0 facts.
+- `SUGGESTED_NEXT_STEP_LABS_DI` with safety-preserving labs/DI considerations.
+- `SUGGESTED_PROVIDER_EVAL` with provider review needed before next-step triage.
+- `OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS` when stable outpatient-style planning may be reviewed.
+- `HYBRID_PATHWAY_CONSIDERATIONS` when targeted labs/DI or provider review must occur before outpatient-style planning.
+- `EVIDENCE_NOTES` with cited support or uncertainty.
+- `SAFETY_FLAGS` for any reason restraint could be unsafe.
 
 ## Evidence Rules
 - Use OpenEvidence-cited evidence or guideline rationale where available.
@@ -63,16 +66,22 @@ Do not write:
 ## Expected Plain Text Output
 Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+NEXT_STEP_TRIAGE_CATEGORY: immediate_acute_critical_care_provider_eval | provider_eval_with_labs_di_plan | structured_outpatient_or_telehealth_review | hybrid_labs_di_then_outpatient_review | insufficient_information
 
-SUGGESTED_ORDER_CONSIDERATIONS:
+TRIAGE_RATIONALE:
+- Rationale...
+
+SUGGESTED_NEXT_STEP_LABS_DI:
 - Consider...
 
-RESOURCE_FORECAST:
-- Likely...
+SUGGESTED_PROVIDER_EVAL:
+- Provider evaluation needed...
 
-COST_RESTRAINT_CAUTIONS:
-- Avoid...
+OUTPATIENT_OR_TELEHEALTH_CONSIDERATIONS:
+- Outpatient or telehealth consideration...
+
+HYBRID_PATHWAY_CONSIDERATIONS:
+- Hybrid pathway consideration...
 
 MISSING_INFORMATION:
 - Missing...

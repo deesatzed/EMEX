@@ -58,7 +58,17 @@ Provider web workflow:
    - `cost_restraint_review`
    - `discordance_review` only after actual provider actions/outcomes are available for retrospective PI review.
 4. Paste the OE output back into EMEX. The expected OE output is plain text with the labels shown in the DotFlow, not JSON.
-5. Click `Parse OE` to view structured clinician-draft suggestions and parsed output.
+5. Click `Parse OE` to view clinician-draft next-step triage synthesis.
+
+Expected final triage synthesis:
+
+- `immediate_acute_critical_care_provider_eval`: needs acute/critical care or immediate provider evaluation.
+- `provider_eval_with_labs_di_plan`: needs provider evaluation plus suggested next-step labs/DI to complete triage.
+- `structured_outpatient_or_telehealth_review`: potentially stable for outpatient, telehealth, or triage-provider review after clinician confirmation.
+- `hybrid_labs_di_then_outpatient_review`: needs targeted labs/DI or provider review before outpatient-style planning can be considered.
+- `insufficient_information`: cannot safely classify from the supplied triage-complete information.
+
+The parsed output includes triage rationale, suggested next-step labs/DI, suggested provider evaluation, outpatient/telehealth considerations, hybrid pathway considerations, missing information, evidence notes, and safety flags.
 
 ## Safety Boundaries
 

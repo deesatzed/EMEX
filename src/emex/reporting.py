@@ -13,9 +13,16 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
 
 
 def render_html_report(packet: dict[str, Any], suggestions: dict[str, Any]) -> str:
-    orders = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["suggested_order_considerations"])
-    resources = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["resource_forecast"])
-    cautions = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["cost_restraint_cautions"])
+    rationale = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["triage_rationale"])
+    labs_di = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["suggested_next_step_labs_di"])
+    provider_eval = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["suggested_provider_eval"])
+    outpatient = "".join(
+        f"<li>{html.escape(str(item))}</li>"
+        for item in suggestions["outpatient_or_telehealth_considerations"]
+    )
+    hybrid = "".join(
+        f"<li>{html.escape(str(item))}</li>" for item in suggestions["hybrid_pathway_considerations"]
+    )
     missing = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["missing_information"])
     flags = "".join(f"<li>{html.escape(str(item))}</li>" for item in suggestions["safety_flags"])
     return f"""<!doctype html>
@@ -46,12 +53,14 @@ def render_html_report(packet: dict[str, Any], suggestions: dict[str, Any]) -> s
     <p><strong>Redacted packet hash:</strong> <code>{html.escape(packet.get('redacted_packet_hash', ''))}</code></p>
   </section>
   <section>
-    <h2>Risk Bucket</h2>
-    <p>{html.escape(str(suggestions.get('risk_bucket', 'insufficient_information')))}</p>
+    <h2>Next-Step Triage Category</h2>
+    <p>{html.escape(str(suggestions.get('next_step_triage_category', 'insufficient_information')))}</p>
   </section>
-  <section><h2>Suggested Order Considerations</h2><ul>{orders}</ul></section>
-  <section><h2>Resource Forecast</h2><ul>{resources}</ul></section>
-  <section><h2>Cost / Restraint Cautions</h2><ul>{cautions}</ul></section>
+  <section><h2>Triage Rationale</h2><ul>{rationale}</ul></section>
+  <section><h2>Suggested Next-Step Labs / DI</h2><ul>{labs_di}</ul></section>
+  <section><h2>Suggested Provider Evaluation</h2><ul>{provider_eval}</ul></section>
+  <section><h2>Outpatient / Telehealth Considerations</h2><ul>{outpatient}</ul></section>
+  <section><h2>Hybrid Pathway Considerations</h2><ul>{hybrid}</ul></section>
   <section><h2>Missing Information</h2><ul>{missing}</ul></section>
   <section><h2>Safety Flags</h2><ul>{flags}</ul></section>
 </main>
@@ -67,7 +76,7 @@ def render_pi_summary(packet: dict[str, Any], suggestions: dict[str, Any]) -> st
             "",
             f"- Case ID: `{packet.get('case_id', '')}`",
             f"- Output status: `{suggestions.get('status', '')}`",
-            f"- Risk bucket: `{suggestions.get('risk_bucket', '')}`",
+            f"- Next-step triage category: `{suggestions.get('next_step_triage_category', '')}`",
             "- Use limitation: clinician draft for PI review and clinician review only.",
             f"- Redaction findings: `{packet.get('phi_redaction_report', {}).get('findings', {})}`",
             f"- Leakage errors: `{packet.get('leakage_report', {}).get('errors', [])}`",
