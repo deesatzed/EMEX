@@ -20,7 +20,12 @@ def test_static_web_declares_demo_only_and_cli_authority():
     assert "Fourth: cost_restraint_review" in html
     assert "Last: discordance_review" in html
     assert "Copy OE Input" in html
-    assert "Copy JSON" in html
+    assert "Copy Parsed Output" in html
+    assert "Parsed Structured Data" in html
+    assert "parsePlainTextOe" in html
+    assert "OE output lacks parseable plain text labels" in html
+    assert "OE output lacks parseable fenced JSON" not in html
+    assert "SUGGESTED_ORDER_CONSIDERATIONS:" in html
     assert "OE Companion Mode" in html
     assert "Open OpenEvidence" in html
     assert "Use browser split view or two side-by-side windows" in html

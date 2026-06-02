@@ -30,8 +30,8 @@ FIRST-PILOT UX:
 4. EMEX processes the material locally, redacts PHI, and rejects current-visit post-triage leakage before generating OE DotFlow-ready input.
 5. User copies the redacted packet into OE and runs the appropriate DotFlow manually.
 6. OE outputs its evaluation to the OE screen.
-7. User copies the OE output back into EMEX.
-8. EMEX preserves the raw OE output, parses it into structured clinician-draft suggestions, and emits audit artifacts.
+7. User copies the plain-text OE output back into EMEX.
+8. EMEX preserves the raw OE output, parses labeled plain-text sections into structured clinician-draft suggestions, and emits audit artifacts.
 
 SAFETY / PROVENANCE:
 - Synthetic mode is the only runnable milestone. Real PHI mode is blocked until an approved environment, QI/IRB/compliance path, and privacy controls are documented.

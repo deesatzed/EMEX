@@ -14,21 +14,29 @@ EMEX does not call OpenEvidence directly, does not connect to an EHR, and does n
 | `cost_restraint_review.md` | Safety-first review of cost, duplication, and low-value testing cautions. |
 | `discordance_review.md` | After-the-fact PI review comparing EMEX/OE suggestions with observed provider actions while separating T0 facts from later facts. |
 
-## Shared Output Contract
+## Shared Plain Text Output Contract
 
-Every DotFlow must return fenced JSON with these EMEX keys:
+Every DotFlow must return plain text with these labels. Do not return JSON. Do not use code fences.
 
-```json
-{
-  "risk_bucket": "low_risk | moderate_risk | high_risk | uncertain | insufficient_information",
-  "suggested_order_considerations": [],
-  "resource_forecast": [],
-  "cost_restraint_cautions": [],
-  "missing_information": [],
-  "evidence_notes": [],
-  "safety_flags": ["clinician-draft only"]
-}
-```
+RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+
+SUGGESTED_ORDER_CONSIDERATIONS:
+- Consider...
+
+RESOURCE_FORECAST:
+- Likely...
+
+COST_RESTRAINT_CAUTIONS:
+- Avoid...
+
+MISSING_INFORMATION:
+- Missing...
+
+EVIDENCE_NOTES:
+- Evidence...
+
+SAFETY_FLAGS:
+- clinician-draft only
 
 ## Non-Negotiable Boundaries
 

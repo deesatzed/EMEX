@@ -9,14 +9,14 @@ REQUIRED_DOTFLOWS = [
     "discordance_review.md",
 ]
 
-REQUIRED_SCHEMA_KEYS = [
-    "risk_bucket",
-    "suggested_order_considerations",
-    "resource_forecast",
-    "cost_restraint_cautions",
-    "missing_information",
-    "evidence_notes",
-    "safety_flags",
+REQUIRED_PLAIN_TEXT_LABELS = [
+    "RISK_BUCKET:",
+    "SUGGESTED_ORDER_CONSIDERATIONS:",
+    "RESOURCE_FORECAST:",
+    "COST_RESTRAINT_CAUTIONS:",
+    "MISSING_INFORMATION:",
+    "EVIDENCE_NOTES:",
+    "SAFETY_FLAGS:",
 ]
 
 REQUIRED_SECTIONS = [
@@ -28,7 +28,7 @@ REQUIRED_SECTIONS = [
     "## Evidence Rules",
     "## Privacy Rules",
     "## Forbidden Output",
-    "## Expected Output Schema",
+    "## Expected Plain Text Output",
     "## Final Quality Check",
 ]
 
@@ -46,9 +46,11 @@ def test_required_dotflows_exist_and_name_emex_schema():
         assert "EMEX" in text
         assert "clinician-draft" in text.lower()
         assert "insufficient_information" in text
-        assert "```json" in text
-        for key in REQUIRED_SCHEMA_KEYS:
-            assert key in text
+        assert "```json" not in text
+        assert "Do not return JSON" in text
+        assert "Do not use code fences" in text
+        for label in REQUIRED_PLAIN_TEXT_LABELS:
+            assert label in text
         for section in REQUIRED_SECTIONS:
             assert section in text
 
@@ -69,5 +71,5 @@ def test_dotflow_readme_maps_required_files_to_workflows():
     text = Path("dotflows", "README.md").read_text()
     for name in REQUIRED_DOTFLOWS:
         assert name in text
-    for key in REQUIRED_SCHEMA_KEYS:
-        assert key in text
+    for label in REQUIRED_PLAIN_TEXT_LABELS:
+        assert label in text

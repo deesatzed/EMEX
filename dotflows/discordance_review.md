@@ -62,25 +62,32 @@ Do not write:
 - Patient instructions.
 - Hidden chain-of-thought or internal deliberation.
 
-## Expected Output Schema
-Return fenced JSON compatible with EMEX:
+## Expected Plain Text Output
+Return plain text only. Do not return JSON. Do not use code fences. Use these labels exactly:
 
-```json
-{
-  "risk_bucket": "low_risk | moderate_risk | high_risk | uncertain | insufficient_information",
-  "suggested_order_considerations": [],
-  "resource_forecast": [],
-  "cost_restraint_cautions": [],
-  "missing_information": [],
-  "evidence_notes": [],
-  "safety_flags": ["clinician-draft only; discordance review only"]
-}
-```
+RISK_BUCKET: low_risk | moderate_risk | high_risk | uncertain | insufficient_information
+
+SUGGESTED_ORDER_CONSIDERATIONS:
+- Consider...
+
+RESOURCE_FORECAST:
+- Likely...
+
+COST_RESTRAINT_CAUTIONS:
+- Avoid...
+
+MISSING_INFORMATION:
+- Missing...
+
+EVIDENCE_NOTES:
+- Evidence...
+
+SAFETY_FLAGS:
+- clinician-draft only; discordance review only
 
 ## Final Quality Check
 Before answering, verify:
-- The output is fenced JSON.
-- Every required EMEX key is present.
+- The output is plain text with every required EMEX label present.
 - T0 facts are separated from later facts.
 - Discordance is framed as a PI review signal, not a correctness verdict.
 - No direct identifiers are repeated.

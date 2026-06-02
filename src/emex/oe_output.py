@@ -17,13 +17,22 @@ UNSAFE_IMPERATIVE_RE = re.compile(
 
 
 def parse_oe_output(text: str, case_id: str) -> dict[str, Any]:
-    """Parse OE output. Prefer fenced JSON; fall back to conservative Markdown extraction."""
+    """Parse OE output. Prefer plain text labels; keep fenced JSON as a legacy fallback."""
     parsed: dict[str, Any] | None = None
-    match = JSON_BLOCK_RE.search(text)
     parse_warnings: list[str] = []
-    if match:
+
+    parsed = _parse_plain_text_sections(text)
+    if _has_minimum_structure(parsed):
+        parse_warnings.append("Parsed plain text labeled OE output")
+
+    if not _has_minimum_structure(parsed):
+        parsed = None
+
+    match = JSON_BLOCK_RE.search(text)
+    if parsed is None and match:
         try:
             parsed = json.loads(match.group(1))
+            parse_warnings.append("Parsed legacy fenced JSON OE output")
         except json.JSONDecodeError as exc:
             parse_warnings.append(f"Fenced JSON could not be parsed: {exc}")
 
@@ -90,6 +99,49 @@ def _parse_markdown_fallback(text: str) -> dict[str, Any]:
         "missing_information": _values(sections, ["missing_information", "missing"]),
         "evidence_notes": _values(sections, ["evidence_notes", "evidence"]),
         "safety_flags": _values(sections, ["safety_flags", "safety"]),
+    }
+
+
+def _parse_plain_text_sections(text: str) -> dict[str, Any]:
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    label_aliases = {
+        "RISK_BUCKET": "risk_bucket",
+        "RISK": "risk_bucket",
+        "SUGGESTED_ORDER_CONSIDERATIONS": "suggested_order_considerations",
+        "ORDER_CONSIDERATIONS": "suggested_order_considerations",
+        "RESOURCE_FORECAST": "resource_forecast",
+        "COST_RESTRAINT_CAUTIONS": "cost_restraint_cautions",
+        "COST_RESTRAINT": "cost_restraint_cautions",
+        "MISSING_INFORMATION": "missing_information",
+        "EVIDENCE_NOTES": "evidence_notes",
+        "SAFETY_FLAGS": "safety_flags",
+    }
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        label_match = re.match(r"^([A-Z][A-Z0-9_ ]{2,}):\s*(.*)$", stripped)
+        if label_match:
+            raw_label, value = label_match.groups()
+            key = label_aliases.get(raw_label.replace(" ", "_"))
+            if key:
+                current = key
+                sections.setdefault(current, [])
+                if value:
+                    sections[current].append(value.strip())
+                continue
+        if current and stripped.startswith(("-", "*")):
+            sections.setdefault(current, []).append(stripped.lstrip("-* ").strip())
+
+    return {
+        "risk_bucket": _first_value(sections, ["risk_bucket"]),
+        "suggested_order_considerations": sections.get("suggested_order_considerations", []),
+        "resource_forecast": sections.get("resource_forecast", []),
+        "cost_restraint_cautions": sections.get("cost_restraint_cautions", []),
+        "missing_information": sections.get("missing_information", []),
+        "evidence_notes": sections.get("evidence_notes", []),
+        "safety_flags": sections.get("safety_flags", []),
     }
 
 

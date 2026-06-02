@@ -57,8 +57,8 @@ Provider web workflow:
    - `risk_resource_forecast`
    - `cost_restraint_review`
    - `discordance_review` only after actual provider actions/outcomes are available for retrospective PI review.
-4. Paste the OE output back into EMEX.
-5. Click `Parse OE` to view structured clinician-draft suggestions and JSON output.
+4. Paste the OE output back into EMEX. The expected OE output is plain text with the labels shown in the DotFlow, not JSON.
+5. Click `Parse OE` to view structured clinician-draft suggestions and parsed output.
 
 ## Safety Boundaries
 
