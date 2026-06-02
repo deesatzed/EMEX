@@ -9,6 +9,7 @@ def test_static_web_declares_demo_only_and_cli_authority():
     assert "would not emit copy-ready OE input" in html
     assert "Provider Workflow" in html
     assert "1. Load Clinical Information" in html
+    assert "narrative text" in html
     assert "2. Prepare OE" in html
     assert "3. Copy Redacted OE Input" in html
     assert "4. Paste OE Output" in html
@@ -25,3 +26,7 @@ def test_static_web_declares_demo_only_and_cli_authority():
     assert "Use browser split view or two side-by-side windows" in html
     assert "Do not embed OpenEvidence" in html
     assert 'target="_blank"' in html
+    assert "inputToRenderableText" in html
+    assert "Free Text Clinical Context" in html
+    assert "invalid json" not in html.lower()
+    assert "forbiddenTextPatterns" in html

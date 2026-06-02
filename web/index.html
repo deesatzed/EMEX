@@ -224,7 +224,7 @@
         <div class="provider-steps">
           <div class="step">
             <span class="num">1</span>
-            <p><strong>Load clinical information.</strong><br><span class="small">Paste or upload the deidentified/synthetic case context gathered from the EHR outside EMEX.</span></p>
+            <p><strong>Load clinical information.</strong><br><span class="small">Paste or upload deidentified/synthetic narrative text, `.txt`, `.md`, or structured JSON gathered from the EHR outside EMEX.</span></p>
           </div>
           <div class="step">
             <span class="num">2</span>
@@ -332,6 +332,14 @@
 }
 \`\`\``;
     const forbiddenKeys = new Set(["current_labs", "current_lab_results", "lab_results", "current_imaging", "current_imaging_results", "imaging_results", "ed_course", "provider_notes", "final_diagnosis", "diagnosis", "disposition", "outcomes", "outcome", "admission_decision", "resulted_orders"]);
+    const forbiddenTextPatterns = [
+      ["current labs", /\bcurrent\s+(labs?|laboratory|troponin|cbc|cmp|resulted\s+orders?)\b/i],
+      ["current imaging", /\bcurrent\s+(imaging|ct|mri|ultrasound|x-?ray|radiology)\b/i],
+      ["ed course", /\b(ed\s+course|reassessment|serial\s+troponin|repeat\s+exam)\b/i],
+      ["final diagnosis", /\b(final\s+diagnosis|diagnosis\s*:|diagnosed\s+with)\b/i],
+      ["disposition", /\b(disposition|admit(?:ted)?|admission|discharge(?:d)?|observation)\b/i],
+      ["outcome", /\b(outcome|returned\s+to\s+ed|follow-up\s+showed)\b/i]
+    ];
     const patterns = [
       ["email", /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[EMAIL]"],
       ["phone", /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, "[PHONE]"],
@@ -366,6 +374,11 @@
       }
       return paths;
     }
+    function findTextLeakage(text) {
+      return forbiddenTextPatterns
+        .filter(([, pattern]) => pattern.test(text))
+        .map(([label]) => `text.${label}`);
+    }
     function redactText(text) {
       const findings = {};
       let output = text;
@@ -394,30 +407,53 @@
       ];
       return sections.map(([title, body]) => `## ${title}\n${body}`).join("\n\n");
     }
-    function prepare() {
-      let payload;
-      try { payload = JSON.parse(caseInput.value); } catch (error) {
-        setStatus([["invalid json", "red"]]);
-        return;
+    function inputToRenderableText(input) {
+      const trimmed = input.trim();
+      if (!trimmed) {
+        return { kind: "empty", rendered: "", leaks: ["text.empty_input"], synthetic: false };
       }
-      const leaks = findLeakage(payload);
-      const rendered = caseToText(payload);
+      try {
+        const payload = JSON.parse(trimmed);
+        return {
+          kind: "json",
+          rendered: caseToText(payload),
+          leaks: findLeakage(payload),
+          synthetic: payload.mode === "synthetic"
+        };
+      } catch (_) {
+        return {
+          kind: "plain_text",
+          rendered: `## Free Text Clinical Context\n${trimmed}`,
+          leaks: findTextLeakage(trimmed),
+          synthetic: true
+        };
+      }
+    }
+    function prepare() {
+      const input = inputToRenderableText(caseInput.value);
+      const leaks = input.leaks;
+      const rendered = input.rendered;
       const red = redactText(rendered);
       const packet = [
         "# EMEX Redacted OE DotFlow Input",
         "SAFETY BOUNDARY: This packet is for clinician review and PI shadow evaluation only.",
         "T0 BOUNDARY: Use only pre-T0 historical context and current triage information.",
+        `INPUT FORMAT: ${input.kind === "plain_text" ? "free text narrative" : "structured JSON"}.`,
         "OUTPUT REQUEST: Return structured clinician-draft suggestions. Use insufficient_information instead of forced recommendations.",
         red.output
       ].join("\n\n");
-      const blocked = leaks.length || payload.mode !== "synthetic";
+      const blocked = leaks.length || !input.synthetic;
       lastRedactedPacket = blocked ? "" : packet;
-      redacted.textContent = leaks.length || payload.mode !== "synthetic"
+      redacted.textContent = blocked
         ? "Blocked: official CLI/backend workflow would not emit copy-ready OE input for this case."
         : packet;
-      redactionReport.textContent = JSON.stringify({ findings: red.findings, copy_ready: leaks.length === 0 && payload.mode === "synthetic" }, null, 2);
-      leakageReport.textContent = JSON.stringify({ blocked: leaks.length > 0 || payload.mode !== "synthetic", errors: leaks }, null, 2);
-      setStatus(leaks.length ? [["blocked", "red"], ["post-T0 leakage", "amber"]] : [["copy ready", "green"], ["redacted", "green"]]);
+      redactionReport.textContent = JSON.stringify({ input_format: input.kind, findings: red.findings, copy_ready: !blocked }, null, 2);
+      leakageReport.textContent = JSON.stringify({ blocked, errors: leaks }, null, 2);
+      if (input.kind === "empty") {
+        setStatus([["empty input", "red"]]);
+      } else {
+        setStatus(leaks.length ? [["blocked", "red"], ["post-T0 leakage", "amber"]] : [["copy ready", "green"], ["redacted", "green"], [input.kind, ""]]);
+      }
     }
     function parseOe() {
       const match = oeOutput.value.match(/```json\s*([\s\S]*?)\s*```/);

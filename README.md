@@ -36,7 +36,7 @@ Open `web/index.html` in a browser, or serve it locally:
 python3 -m http.server 4174
 ```
 
-The web page mirrors the pilot flow: paste synthetic EHR-like context, redact and package it for OE, paste OE output back, and view clinician-draft structured suggestions.
+The web page mirrors the pilot flow: paste synthetic EHR-like text or JSON context, redact and package it for OE, paste OE output back, and view clinician-draft structured suggestions.
 
 The static web page is a workflow demo. The CLI/backend artifact path is authoritative for safety checks and audit artifacts until the web UI shares the Python validation/redaction engine.
 
@@ -49,7 +49,7 @@ OE Companion Mode:
 
 Provider web workflow:
 
-1. Load clinical information by pasting or uploading the deidentified/synthetic case context.
+1. Load clinical information by pasting or uploading deidentified/synthetic narrative text, `.txt`, `.md`, or structured JSON.
 2. Click `Prepare OE` to redact identifiers, check post-triage leakage, and create copy-ready OE input.
 3. Copy the redacted packet into OpenEvidence and run DotFlows in this order:
    - `ed_shadow_recommender`
